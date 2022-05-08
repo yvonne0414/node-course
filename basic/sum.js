@@ -1,8 +1,23 @@
 function sum(n){
-  sum = 0
+  //for迴圈
+  // sum = 0
+  // for(let i = 1; i <= n; i++){
+  //   sum += i;
+  // }
+  // return sum;
+
+  //公式解
+  // return (n + 1) * n /2;
+
+  //reduce
+  let arr = [];
   for(let i = 1; i <= n; i++){
-    sum += i;
+    arr.push(i)
   }
+  let sum = arr.reduce((acc, num) => {
+    acc +=num
+    return acc
+  }, 0)
   return sum;
 }
 
