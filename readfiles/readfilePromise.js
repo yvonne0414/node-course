@@ -2,8 +2,8 @@ const { rejects } = require('assert');
 const fs = require('fs');
 const { resolve } = require('path');
 
-fs.readFile('test.txt', 'utf-8', (err, data) => {
-  let p = new Promise ((resolve, rejects)=>{
+let fsp = new Promise ((resolve, rejects)=>{
+  fs.readFile('test.txt', 'utf-8', (err, data) => {
     if (err) {
       // 錯誤了
       // console.log('喔喔喔，發生錯誤了');
@@ -15,10 +15,12 @@ fs.readFile('test.txt', 'utf-8', (err, data) => {
       resolve(data)
     }
   })
-  p.then((result)=>{
-    console.log(result)
-  }).catch((error)=>{
-    console.log(error)
-  })
+ 
   
 });
+
+fsp.then((result)=>{
+  console.log(result)
+}).catch((error)=>{
+  console.log(error)
+})
