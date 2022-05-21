@@ -4,6 +4,8 @@
 // npm i mysql2
 // 引用進來
 const mysql = require('mysql2/promise');
+const axios = require('axios');
+
 require('dotenv').config();
 
 (async () => {
@@ -16,14 +18,22 @@ require('dotenv').config();
   });
 
   let [data, fields] = await connection.execute('SELECT * FROM stocks');
-  console.log(data);
+  // console.log(data);
+  let mapResult = data.map(async (stock, i) => {
+    let res = await axios.get('https://www.twse.com.tw/exchangeReport/STOCK_DAY', {
+      params: {
+        // 設定 query string
+        response: 'json',
+        date: '20220301',
+        stockNo: stock.id,
+      },
+    });
+    return res.data.data;
+  });
+  // console.log(mapResult);
 
-  // results [
-  //     [],
-  //     []
-  // ]
-  //let data = results[0];
-  //let fields = results[1];
+  let priceRes = await Promise.all(mapResult);
+  console.log(priceRes);
 
   connection.end();
 })();
