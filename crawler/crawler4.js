@@ -1,27 +1,28 @@
-// await version
-// 1. read stock no from file (fs)
-// 2. axios.get to request data
+// read stock no from mysql database
 
-const axios = require('axios');
-const fs = require('fs/promises'); // ->使用 promise版本
+// mysql2 是一個第三方套件
+// npm i mysql2
+// 引用進來
+const mysql = require('mysql2/promise');
 
-fs.readFile('stock.txt', 'utf-8')
-  .then((stockNo) => {
-    console.log('read stock no from file:', stockNo);
-
-    return axios.get('https://www.twse.com.tw/exchangeReport/STOCK_DAY', {
-      params: {
-        // 設定 query string
-        response: 'json',
-        date: '20220301',
-        stockNo: stockNo,
-      },
-    });
-  })
-  .then((response) => {
-    // response 物件
-    console.log(response.data);
-  })
-  .catch((e) => {
-    console.error(e);
+(async () => {
+  const connection = await mysql.createConnection({
+    host: 'localhost',
+    port: 3306,
+    user: 'admin',
+    password: '',
+    database: 'stoke_db',
   });
+
+  let [data, fields] = await connection.execute('SELECT * FROM stocks');
+  console.log(data);
+
+  // results [
+  //     [],
+  //     []
+  // ]
+  //let data = results[0];
+  //let fields = results[1];
+
+  connection.end();
+})();
