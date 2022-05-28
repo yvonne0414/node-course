@@ -5,6 +5,9 @@ const express = require('express');
 const app = express();
 const path = require('path');
 // express 是由 middleware （中間件）組成的世界
+const cors = require('cors');
+
+app.use(cors());
 
 const mysql = require('mysql2');
 require('dotenv').config();
@@ -64,6 +67,13 @@ app.get('/stocks/:stockId', async (req, res, next) => {
   // req.params
   console.log(req.params);
   let [data, fields] = await pool.execute('SELECT * FROM stocks WHERE id =' + req.params.stockId);
+  res.json(data);
+});
+
+app.get('/stockDetails/:stockId', async (req, res, next) => {
+  // req.params
+  console.log(req.params);
+  let [data, fields] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id =' + req.params.stockId);
   res.json(data);
 });
 
