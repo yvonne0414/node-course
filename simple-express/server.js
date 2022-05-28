@@ -3,17 +3,79 @@
 const express = require('express');
 // 利用express來建立一個express application
 const app = express();
+const path = require('path');
+// express 是由 middleware （中間件）組成的世界
+
+const mysql = require('mysql2');
+require('dotenv').config();
+let pool = mysql
+  .createPool({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PWD,
+    database: process.env.DB_DATABASE,
+    // 為了pool新增的參數
+    connectionLimit: 10,
+  })
+  .promise();
+
+// express
+app.use(express.static(path.join(__dirname, 'assets')));
+
+app.use((req, res, next) => {
+  console.log('我是一個沒用的中間件aaa');
+  next();
+});
+app.use((req, res, next) => {
+  console.log('我是一個沒用的中間件bbb');
+  next();
+});
+app.use((req, res, next) => {
+  console.log('我是一個沒用的中間件ccc');
+  next();
+});
 
 // http
 // get post
-app.get('/', (req, res, next) => {
+app.get('/', (req, res) => {
   // 一定要res
   res.send('首頁');
+  // 送回res，結束req-res cycle
   console.log('首頁');
 });
-app.get('/about', (req, res, next) => {
+app.get('/about', (req, res) => {
   res.send('about');
   console.log('about');
+});
+
+app.get('/error', (req, res, next) => {
+  // throw new Error('test');
+  // res.send('error');
+  next('err');
+});
+
+app.get('/stocks', async (req, res, next) => {
+  let [data, fields] = await pool.execute('SELECT * FROM stocks');
+  res.json(data);
+});
+
+app.get('/stocks/:stockId', async (req, res, next) => {
+  // req.params
+  console.log(req.params);
+  let [data, fields] = await pool.execute('SELECT * FROM stocks WHERE id =' + req.params.stockId);
+  res.json(data);
+});
+
+app.use((req, res, next) => {
+  console.log('所有路由後面==>404', req.path);
+  res.status(404).send('NOT FOUND');
+});
+
+// 5xx
+app.use((err, req, res, next) => {
+  console.error('來自四個參數的錯誤處理中間件', req.path, err);
+  res.status(500).send('Server Error:  請洽系統管理員');
 });
 
 app.listen(3001, () => {
