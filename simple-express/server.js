@@ -26,18 +26,18 @@ let pool = mysql
 // express
 app.use(express.static(path.join(__dirname, 'assets')));
 
-app.use((req, res, next) => {
-  console.log('我是一個沒用的中間件aaa');
-  next();
-});
-app.use((req, res, next) => {
-  console.log('我是一個沒用的中間件bbb');
-  next();
-});
-app.use((req, res, next) => {
-  console.log('我是一個沒用的中間件ccc');
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log('我是一個沒用的中間件aaa');
+//   next();
+// });
+// app.use((req, res, next) => {
+//   console.log('我是一個沒用的中間件bbb');
+//   next();
+// });
+// app.use((req, res, next) => {
+//   console.log('我是一個沒用的中間件ccc');
+//   next();
+// });
 
 // http
 // get post
