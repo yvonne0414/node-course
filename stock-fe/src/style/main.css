@@ -26,6 +26,20 @@ html {
   tab-size: 4;
 }
 
+.pageItem{
+  display:flex;
+  justify-content: center;
+  align-items:center;
+  width: 20px;
+  height: 20px;
+  margin: 0 3px;
+  background: #ccc;
+  border-radius: 50%;
+  color: #fff;
+}
+.pageItem.active{
+  background: rgba(59, 130, 246,.5)
+}
 /**
 1. Correct the line height in all browsers.
 2. Prevent adjustments of font size after orientation changes in iOS.
