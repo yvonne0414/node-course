@@ -75,11 +75,11 @@ app.get('/stocks/:stockId', async (req, res, next) => {
 app.get('/stockDetails/:stockId', async (req, res, next) => {
   // req.params
   console.log(req.params);
-  let [allResults, fields] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ?', [req.params.stockId]);
+  let [allResults, fields] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ? ', [req.params.stockId]);
   // RESTful 風格
   // 第幾頁
   let page = req.query.page || 1;
-  // console.log('current page:', page);
+  console.log('current page:', page);
 
   // 總筆數
   const total = allResults.length;
@@ -95,11 +95,15 @@ app.get('/stockDetails/:stockId', async (req, res, next) => {
   // console.log('offset:', offset);
 
   // 取得這一頁資料
-  let [perPageResults] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ? limit ? offset ?', [req.params.stockId, perPage, offset]);
+  let [perPageResults] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ? ORDER BY date DESC limit ? offset ? ', [req.params.stockId, perPage, offset]);
 
   // 回復給前端
   res.json({
-    pagenation: {},
+    pagination: {
+      total,
+      lastPage,
+      page,
+    },
     data: perPageResults,
   });
 });
