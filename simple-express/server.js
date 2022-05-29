@@ -7,6 +7,8 @@ const path = require('path');
 // express 是由 middleware （中間件）組成的世界
 const cors = require('cors');
 
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cors());
 
 const mysql = require('mysql2');
@@ -66,15 +68,40 @@ app.get('/stocks', async (req, res, next) => {
 app.get('/stocks/:stockId', async (req, res, next) => {
   // req.params
   console.log(req.params);
-  let [data, fields] = await pool.execute('SELECT * FROM stocks WHERE id =' + req.params.stockId);
+  let [data, fields] = await pool.execute('SELECT * FROM stocks WHERE id =?', [req.params.stockId]);
   res.json(data);
 });
 
 app.get('/stockDetails/:stockId', async (req, res, next) => {
   // req.params
   console.log(req.params);
-  let [data, fields] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id =' + req.params.stockId);
-  res.json(data);
+  let [allResults, fields] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ?', [req.params.stockId]);
+  // RESTful 風格
+  // 第幾頁
+  let page = req.query.page || 1;
+  // console.log('current page:', page);
+
+  // 總筆數
+  const total = allResults.length;
+  // console.log('total:', total);
+
+  // 總共有幾頁
+  const perPage = 5;
+  const lastPage = Math.ceil(total / perPage);
+  // console.log('lastPage:', lastPage);
+
+  // 計算offset（要跳過的）
+  const offset = (page - 1) * perPage;
+  // console.log('offset:', offset);
+
+  // 取得這一頁資料
+  let [perPageResults] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ? limit ? offset ?', [req.params.stockId, perPage, offset]);
+
+  // 回復給前端
+  res.json({
+    pagenation: {},
+    data: perPageResults,
+  });
 });
 
 app.use((req, res, next) => {
