@@ -1,36 +1,35 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from 'react-query';
 
 const StockDetails = () => {
   const [stockDetails, setStockDetails] = useState([]);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [pageto, setPageto] = useState(1);
   const stockId = useParams().stockId;
   // console.log('stockId', stockId);
   useEffect(() => {
     let getStocks = async () => {
       let res = await axios.get(`http://localhost:3001/stockDetails/${stockId}`, {
         params: {
-          page: pageto,
+          page: page,
         },
       });
       setStockDetails(res.data.data);
-      setPage(res.data.pagination.page);
       setLastPage(res.data.pagination.lastPage);
       setTotal(res.data.pagination.total);
       // console.log(res.data);
     };
     getStocks();
-  }, [stockId, pageto]);
+  }, [stockId, page]);
   // console.log('page', page);
   const getPages = () => {
     let pages = [];
+    // console.log('page', page, typeof page);
     for (let i = 1; i <= lastPage; i++) {
-      if (i == page) {
+      // console.log('i', i, typeof i);
+      if (i === Number(page)) {
         pages.push(
           <li className="pageItem active" key={i}>
             {i}
@@ -38,7 +37,7 @@ const StockDetails = () => {
         );
       } else {
         pages.push(
-          <li className="pageItem" key={i} id={i} onClick={(e) => setPageto(e.target.id)}>
+          <li className="pageItem" key={i} onClick={(e) => setPage(i)}>
             {i}
           </li>
         );
@@ -48,9 +47,9 @@ const StockDetails = () => {
   };
   return (
     <div>
-      <div className="flex justify-between m-6">
+      <div className="flex justify-between items-center m-6">
         {/* <input type="number" name="" id="" value={pageto} onChange={(e) => setPageto(e.target.value)} /> */}
-        <ul className="flex">{getPages()}</ul>
+        <ul className="flex items-center">{getPages()}</ul>
         <div className="text-right">
           {page}/{lastPage}頁，共{total}筆
         </div>
