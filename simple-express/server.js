@@ -10,20 +10,9 @@ const cors = require('cors');
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
-
-const mysql = require('mysql2');
 require('dotenv').config();
-let pool = mysql
-  .createPool({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PWD,
-    database: process.env.DB_DATABASE,
-    // 為了pool新增的參數
-    connectionLimit: 10,
-  })
-  .promise();
+
+const pool = require('./utils/db');
 
 // express
 app.use(express.static(path.join(__dirname, 'assets')));
@@ -60,53 +49,8 @@ app.get('/error', (req, res, next) => {
   next('err');
 });
 
-app.get('/stocks', async (req, res, next) => {
-  let [data, fields] = await pool.execute('SELECT * FROM stocks');
-  res.json(data);
-});
-
-app.get('/stocks/:stockId', async (req, res, next) => {
-  // req.params
-  console.log(req.params);
-  let [data, fields] = await pool.execute('SELECT * FROM stocks WHERE id =?', [req.params.stockId]);
-  res.json(data);
-});
-
-app.get('/stockDetails/:stockId', async (req, res, next) => {
-  // req.params
-  // console.log(req.params);
-  let [allResults, fields] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ? ', [req.params.stockId]);
-  // RESTful 風格
-  // 第幾頁
-  let page = req.query.page || 1;
-  // console.log('current page:', page);
-
-  // 總筆數
-  const total = allResults.length;
-  // console.log('total:', total);
-
-  // 總共有幾頁
-  const perPage = 5;
-  const lastPage = Math.ceil(total / perPage);
-  // console.log('lastPage:', lastPage);
-
-  // 計算offset（要跳過的）
-  const offset = (page - 1) * perPage;
-  // console.log('offset:', offset);
-
-  // 取得這一頁資料
-  let [perPageResults] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ? ORDER BY date DESC limit ? offset ? ', [req.params.stockId, perPage, offset]);
-
-  // 回復給前端
-  res.json({
-    pagination: {
-      total,
-      lastPage,
-      page,
-    },
-    data: perPageResults,
-  });
-});
+const StockRouter = require('./routers/stockRouter');
+app.use('/api/stocks', StockRouter);
 
 app.use((req, res, next) => {
   console.log('所有路由後面==>404', req.path);

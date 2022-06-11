@@ -1,17 +1,19 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { API_URL } from '../utils/config';
 
 const StockDetails = () => {
   const [stockDetails, setStockDetails] = useState([]);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const stockId = useParams().stockId;
+  const { stockId } = useParams();
   // console.log('stockId', stockId);
   useEffect(() => {
+    console.log(`${API_URL}/stocks/${stockId}`);
     let getStocks = async () => {
-      let res = await axios.get(`http://localhost:3001/stockDetails/${stockId}`, {
+      let res = await axios.get(`${API_URL}/stocks/${stockId}`, {
         params: {
           page: page,
         },

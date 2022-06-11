@@ -5,7 +5,6 @@ const About = () => {
 
       <>
         <h3>Hi, 小明</h3>
-        <img />
       </>
     </div>
   );

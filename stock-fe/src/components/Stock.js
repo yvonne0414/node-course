@@ -1,16 +1,18 @@
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import { API_URL } from '../utils/config';
 
 const Stock = () => {
   const [stocks, setStocks] = useState([]);
+  console.log('API_URL', API_URL);
   useEffect(() => {
     let getStocks = async () => {
-      let res = await axios.get('http://localhost:3001/stocks');
+      let res = await axios.get(`${API_URL}/stocks`);
       setStocks(res.data);
     };
     getStocks();
-  }, [stocks]);
+  }, []);
   return (
     <div>
       <h2 className="ml-7 mt-6 text-xl text-gray-600">股票代碼</h2>
