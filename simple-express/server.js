@@ -6,11 +6,11 @@ const app = express();
 const path = require('path');
 // express 是由 middleware （中間件）組成的世界
 const cors = require('cors');
-
-app.use(express.urlencoded({ extended: true }));
-
 app.use(cors());
 require('dotenv').config();
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 const pool = require('./utils/db');
 
@@ -51,6 +51,9 @@ app.get('/error', (req, res, next) => {
 
 const StockRouter = require('./routers/stockRouter');
 app.use('/api/stocks', StockRouter);
+
+const AuthRouter = require('./routers/authRouter');
+app.use('/api/auth', AuthRouter);
 
 app.use((req, res, next) => {
   console.log('所有路由後面==>404', req.path);
