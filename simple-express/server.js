@@ -6,16 +6,48 @@ const app = express();
 const path = require('path');
 // express 是由 middleware （中間件）組成的世界
 const cors = require('cors');
-app.use(cors());
 require('dotenv').config();
+
+// 啟用 sesstion
+// npm i express-session
+// expression-session 預設是存在應用程式的記憶體（node server.js)
+const expressSession = require('express-session');
+let FileStore = require('session-file-store')(expressSession);
+app.use(
+  expressSession({
+    store: new FileStore({
+      path: path.join(__dirname, '..', 'sesstions'),
+    }),
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// 使用第三方套件 cors
+// app.use(cors());
+// origin: *
+// 全開，但不包括跨源讀取 cookie
+// 若想跨源讀取 cookie:
+app.use(
+  cors({
+    // origin不能是*
+    origin: ['http://localhost:3000'],
+    credentials: true,
+  })
+);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const pool = require('./utils/db');
 
-// express
+// express 處理靜態資料
+// 不指定網址
 app.use(express.static(path.join(__dirname, 'assets')));
+
+// 指定網址
+app.use('/images/members', express.static(path.join(__dirname, 'public', 'members')));
 
 // app.use((req, res, next) => {
 //   console.log('我是一個沒用的中間件aaa');
@@ -54,6 +86,9 @@ app.use('/api/stocks', StockRouter);
 
 const AuthRouter = require('./routers/authRouter');
 app.use('/api/auth', AuthRouter);
+
+const MemberRouter = require('./routers/memberRouter');
+app.use('/api/member', MemberRouter);
 
 app.use((req, res, next) => {
   console.log('所有路由後面==>404', req.path);

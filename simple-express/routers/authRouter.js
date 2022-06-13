@@ -53,7 +53,7 @@ const registerRules = [
     })
     .withMessage('密碼驗證不一樣'),
 ];
-
+// api/auth/login/register
 router.post('/register', uploader.single('photo'), registerRules, async (req, res) => {
   // 1. req.params <-- 網址上的路由參數
   // 2. req.query  <-- 網址上的 query string
@@ -95,6 +95,47 @@ router.post('/register', uploader.single('photo'), registerRules, async (req, re
 
   // response
   res.json({ code: 0, result: 'OK' });
+});
+
+// api/auth/login
+router.post('/login', async (req, res) => {
+  // TODO: 確認資料有收到
+  console.log(req.body);
+  // TODO: 確認有沒有這個帳號
+  let [members] = await pool.execute('SELECT id, name, email, password, photo From members WHERE email = ?', [req.body.email]);
+  if (members.length === 0) {
+    // 沒有註冊過
+    // TODO: 如果沒有就回覆錯誤
+    return res.status(400), json({ code: 3003, error: '帳號或密碼錯誤' });
+  }
+
+  // 把會員資料拿出來
+  let member = members[0];
+
+  // TODO: 如果有，確認密碼
+  let passwordCompareResult = await bcrypt.compare(req.body.password, member.password);
+  if (passwordCompareResult === false) {
+    return res.status(400).json({ code: 3004, error: '帳號或密碼錯誤' });
+  }
+  if (passwordCompareResult === false) {
+    // TODO: 如果密碼不符合，回覆錯誤
+    return res.status(400).json({ code: 3004, error: '帳號密碼錯誤' });
+  }
+  // TODO: 密碼ok，開始寫seestion（用sesstion-cookie完成）=>可用jwt取代
+  // 要先去server.js啟動sesstion
+  let returnMember = {
+    email: member.email,
+    name: member.name,
+    photo: member.photo,
+  };
+  req.session.member = returnMember;
+  // TODO: 回資料給前端
+  res.json({ code: 0, member: returnMember });
+});
+
+router.post('/logout', async (req, res) => {
+  req.session.member = null;
+  res.sendStatus(202);
 });
 
 module.exports = router;
